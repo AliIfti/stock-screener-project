@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
 COPY package.json ./
-COPY .env ./
+
 RUN npm install
 
 # Copy the rest of the app
