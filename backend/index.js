@@ -1,35 +1,74 @@
-// backend/index.js
-const axios = require("axios");
-require("dotenv").config();
+require('dotenv').config();
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
 
-exports.handler = async (event) => {
-    const symbol = event.queryStringParameters.symbol;
-    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+const app = express();
+const PORT = 8080;
 
-    try {
-        const response = await axios.get(
-            `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`
-        );
-        const data = response.data;
+// Allow CORS for local dev and frontend
+app.use(cors());
 
-        if (data["Time Series (Daily)"]) {
-            return {
-                statusCode: 200,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data["Time Series (Daily)"]),
-            };
-        } else {
-            return {
-                statusCode: 404,
-                body: JSON.stringify({ error: "Invalid symbol or API limit reached" }),
-            };
-        }
-    } catch (error) {
-        console.error(error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Server error" }),
-        };
+// Test route
+app.get('/', (req, res) => {
+  res.send('Stock Screener Backend is running.');
+});
+
+// Route to fetch stock data
+app.get('/api/stock', async (req, res) => {
+  const { symbol } = req.query;
+  const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+
+  console.log('Received request for symbol:', symbol);
+  console.log('API Key present:', !!apiKey);
+
+  if (!symbol) {
+    console.log('Error: Symbol is required');
+    return res.status(400).json({ error: 'Symbol is required' });
+  }
+
+  if (!apiKey) {
+    console.log('Error: Missing API key');
+    return res.status(500).json({ error: 'Missing API key' });
+  }
+
+  try {
+    console.log('Making request to Alpha Vantage API...');
+    const response = await axios.get('https://www.alphavantage.co/query', {
+      params: {
+        function: 'TIME_SERIES_DAILY',
+        symbol,
+        apikey: apiKey,
+      },
+    });
+
+    console.log('API Response status:', response.status);
+    console.log('API Response data:', JSON.stringify(response.data).slice(0, 200) + '...');
+
+    if (response.data['Error Message']) {
+      console.log('API Error:', response.data['Error Message']);
+      return res.status(400).json({ error: 'Invalid symbol or API error' });
     }
-};
 
+    if (response.data['Note']) {
+      console.log('API Note:', response.data['Note']);
+      return res.status(429).json({ error: 'API rate limit exceeded' });
+    }
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('API request failed:', error.message);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      console.error('Error status:', error.response.status);
+    }
+    res.status(500).json({ error: 'Failed to fetch stock data', details: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Backend server is running on http://localhost:${PORT}`);
+  console.log('Environment variables loaded:', {
+    ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ? 'Present' : 'Missing'
+  });
+});
