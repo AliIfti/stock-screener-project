@@ -27,8 +27,14 @@ COPY --from=build /app/build /usr/share/nginx/html
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Add script to replace port in nginx config
+RUN echo '#!/bin/sh\n\
+sed -i "s/listen 3000/listen $PORT/g" /etc/nginx/conf.d/default.conf\n\
+nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
+
 # Expose port
 EXPOSE ${PORT:-3000}
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start nginx with custom entrypoint
+CMD ["/docker-entrypoint.sh"]
