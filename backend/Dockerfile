@@ -5,15 +5,14 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
-COPY package.json ./
-# COPY .env ./
+COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the app
 COPY . .
 
-# Expose the port your function will run on
-EXPOSE 8080
+# Expose the port your app will run on
+EXPOSE ${PORT:-8080}
 
-# Start the Lambda function
+# Start the server
 CMD ["node", "index.js"]

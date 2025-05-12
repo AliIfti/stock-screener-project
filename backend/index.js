@@ -4,10 +4,14 @@ const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
-// Allow CORS for local dev and frontend
-app.use(cors());
+// Allow CORS for all origins in production
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? process.env.FRONTEND_URL 
+        : 'http://localhost:3000'
+}));
 
 // Test route
 app.get('/', (req, res) => {
@@ -66,9 +70,11 @@ app.get('/api/stock', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
-  console.log('Environment variables loaded:', {
-    ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ? 'Present' : 'Missing'
-  });
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Backend server is running on port ${PORT}`);
+    console.log('Environment variables loaded:', {
+        ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ? 'Present' : 'Missing',
+        NODE_ENV: process.env.NODE_ENV || 'development',
+        FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000'
+    });
 });

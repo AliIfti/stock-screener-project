@@ -11,6 +11,9 @@ import {
     ResponsiveContainer
 } from "recharts";
 
+// Get API URL from environment variable or use default for local development
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 function App() {
     const [symbol, setSymbol] = useState("");
     const [data, setData] = useState(null);
@@ -33,13 +36,14 @@ function App() {
     const fetchStockData = async () => {
         try {
             const response = await axios.get(
-                `http://localhost:8080/api/stock?symbol=${symbol}`
+                `${API_URL}/api/stock?symbol=${symbol}`
             );
             setData(response.data);
             setChartData(processStockData(response.data));
             setError("");
         } catch (err) {
-            setError("Invalid symbol or server error.");
+            console.error('API Error:', err);
+            setError(err.response?.data?.error || "Invalid symbol or server error.");
             setData(null);
             setChartData([]);
         }

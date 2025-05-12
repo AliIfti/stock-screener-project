@@ -1,13 +1,15 @@
-# Use the official Node.js 18 image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine as build
 
-# Set the working directory
-WORKDIR app/
+# Set working directory
+WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package.json ./
+# Copy package files
+COPY package*.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
+
+# Install dependencies
 RUN npm install
 
 # Copy the rest of the app
@@ -16,11 +18,17 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Install a simple HTTP server to serve the frontend
-RUN npm install -g serve
+# Production stage
+FROM nginx:alpine
 
-# Expose the port for the frontend
-EXPOSE 3000
+# Copy built assets from build stage
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Serve the built frontend
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port
+EXPOSE ${PORT:-3000}
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
