@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 // Get API URL from environment variable or use default for local development
-const API_URL = process.env.REACT_APP_API_URL || 'https://stock-screener-project-production.up.railway.app/';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 function App() {
     const [symbol, setSymbol] = useState("");
