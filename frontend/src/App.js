@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 // Get API URL from environment variable or use default for local development
-const API_URL = "https://stock-screener-project-production.up.railway.app/";
+const API_URL = "https://stock-screener-project-production.up.railway.app";
 console.log('API URL:', API_URL); // Debug log
 
 function App() {
