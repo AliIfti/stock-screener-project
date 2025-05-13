@@ -24,17 +24,15 @@ FROM nginx:alpine
 # Copy built assets from build stage
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy nginx config
+# Copy nginx config and start script
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY start-nginx.sh /start-nginx.sh
 
-# Add script to replace port in nginx config
-RUN echo '#!/bin/sh\n\
-sed -i "s/listen 3000/listen $PORT/g" /etc/nginx/conf.d/default.conf\n\
-nginx -g "daemon off;"' > /docker-entrypoint.sh && \
-chmod +x /docker-entrypoint.sh
+# Make start script executable
+RUN chmod +x /start-nginx.sh
 
 # Expose port
 EXPOSE ${PORT:-3000}
 
-# Start nginx with custom entrypoint
-CMD ["/docker-entrypoint.sh"]
+# Start nginx using the start script
+CMD ["/start-nginx.sh"]
