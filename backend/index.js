@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8080;
 
 // Allow CORS for all origins in production
 app.use(cors({
-    origin: 'https://stock-screener-project-production-93eb.up.railway.app/'
+    origin: 'https://stock-screener-project-production-93eb.up.railway.app'
 }));
 
 // Test route
