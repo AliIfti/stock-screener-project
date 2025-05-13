@@ -13,6 +13,7 @@ import {
 
 // Get API URL from environment variable or use default for local development
 const API_URL = process.env.REACT_APP_API_URL;
+console.log('API URL:', API_URL); // Debug log
 
 function App() {
     const [symbol, setSymbol] = useState("");
@@ -35,6 +36,7 @@ function App() {
 
     const fetchStockData = async () => {
         try {
+            console.log('Fetching from:', `${API_URL}/api/stock?symbol=${symbol}`); // Debug log
             const response = await axios.get(
                 `${API_URL}/api/stock?symbol=${symbol}`
             );
