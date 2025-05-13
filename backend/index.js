@@ -8,9 +8,7 @@ const PORT = process.env.PORT || 8080;
 
 // Allow CORS for all origins in production
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? process.env.FRONTEND_URL 
-        : 'http://localhost:3000'
+    origin: 'https://stock-screener-project-production-93eb.up.railway.app/'
 }));
 
 // Test route
